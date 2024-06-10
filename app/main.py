@@ -27,7 +27,7 @@ def get_hotels(
             "stars": 5
         }
     ]
-    return date_from, date_to
+    return hotels
 
 
 class SBooking(BaseModel):  # поля для POST запроса
