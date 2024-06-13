@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
-from config import settings
+from app.config import settings
 
 # Генерирую URL базы данных
 # asyncpg выполняет запросы к базе асинхронно
@@ -14,6 +14,7 @@ engine = create_async_engine(settings.DATABASE_URL)
 # создаю генератор сессий, это транзакции к базе данных
 # транзакция это набор инструкций которы мы посылаем в базу данных
 async_session_maker = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
 
 # класс Base используется для миграций, все модели мы будем аккумулировать данные о миграциях,
 # будет передаваться в alembic
