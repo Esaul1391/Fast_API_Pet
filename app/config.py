@@ -2,6 +2,7 @@ from pydantic import root_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+#   переделать
 class Settings(BaseSettings):
     # DB_HOST: str
     # DB_PORT: int
