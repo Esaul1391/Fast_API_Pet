@@ -1,41 +1,68 @@
 from fastapi import HTTPException, status
 
 
-class BookingException(HTTPException):  # <-- наследуемся от HTTPException, который наследован от Exception
-    status_code = 500  # <-- задаем значения по умолчанию
+class BookingException(HTTPException):
+    status_code = 500
     detail = ""
 
     def __init__(self):
         super().__init__(status_code=self.status_code, detail=self.detail)
 
 
-class UserAlreadyExistsException(BookingException):  # <-- обязательно наследуемся от нашего класса
+class UserAlreadyExistsException(BookingException):
     status_code = status.HTTP_409_CONFLICT
     detail = "Пользователь уже существует"
 
 
-IncorrectEMailOrPasswordException = HTTPException(
-    status_code=status.HTTP_401_UNAUTHORIZED,
-    detail='Неверная почта или пароль'
-    )
-
-TokenExpiredException = HTTPException(
-    status_code=status.HTTP_401_UNAUTHORIZED,
-    detail='Истек токен'
-    )
-
-TokenAbsentException = HTTPException(
-    status_code=status.HTTP_401_UNAUTHORIZED,
-    detail='Нет токена'
-    )
-
-IncorrectTokenException = HTTPException(
-    status_code=status.HTTP_401_UNAUTHORIZED,
-    detail='Неверный формат токена'
-    )
-
-UserIsNotPresentException = HTTPException(
-    status_code=status.HTTP_401_UNAUTHORIZED,
-    )
+class IncorrectEmailOrPasswordException(BookingException):
+    status_code = status.HTTP_401_UNAUTHORIZED
+    detail = "Неверная почта или пароль"
 
 
+class TokenExpiredException(BookingException):
+    status_code = status.HTTP_401_UNAUTHORIZED
+    detail = "Срок действия токена истек"
+
+
+class TokenAbsentException(BookingException):
+    status_code = status.HTTP_401_UNAUTHORIZED
+    detail = "Токен отсутствует"
+
+
+class IncorrectTokenFormatException(BookingException):
+    status_code = status.HTTP_401_UNAUTHORIZED
+    detail = "Неверный формат токена"
+
+
+class UserIsNotPresentException(BookingException):
+    status_code = status.HTTP_401_UNAUTHORIZED
+
+
+class RoomFullyBooked(BookingException):
+    status_code = status.HTTP_409_CONFLICT
+    detail = "Не осталось свободных номеров"
+
+
+class RoomCannotBeBooked(BookingException):
+    status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+    detail = "Не удалось забронировать номер ввиду неизвестной ошибки"
+
+
+class DateFromCannotBeAfterDateTo(BookingException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    detail = "Дата заезда не может быть позже даты выезда"
+
+
+class CannotBookHotelForLongPeriod(BookingException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    detail = "Невозможно забронировать отель сроком более месяца"
+
+
+class CannotAddDataToDatabase(BookingException):
+    status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+    detail = "Не удалось добавить запись"
+
+
+class CannotProcessCSV(BookingException):
+    status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+    detail = "Не удалось обработать CSV файл"

@@ -3,7 +3,7 @@ from datetime import datetime
 from fastapi import Request, HTTPException, Depends, status
 from jose import JWTError, jwt  # Используйте jose для работы с JWT
 
-from app.exceptions import IncorrectEMailOrPasswordException, TokenAbsentException, IncorrectTokenException, \
+from app.exceptions import IncorrectEmailOrPasswordException, TokenAbsentException, TokenExpiredException, \
     UserIsNotPresentException
 from app.users.dao import UsersDAO
 
@@ -22,11 +22,11 @@ async def get_current_user(token: str = Depends(get_token)):
             token, 'asdajasasASDASD', algorithms=['HS256']
         )
     except JWTError:
-        raise IncorrectTokenException
+        raise TokenAbsentException
 
     expire: int = payload.get("exp")
     if (not expire) or (datetime.fromtimestamp(expire) < datetime.utcnow()):
-        raise IncorrectEMailOrPasswordException
+        raise IncorrectEmailOrPasswordException
 
     user_id: str = payload.get('sub')
     if not user_id:

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status, Response, Depends
 
-from app.exceptions import UserAlreadyExistsException, IncorrectEMailOrPasswordException
+from app.exceptions import UserAlreadyExistsException, IncorrectEmailOrPasswordException
 from app.users.auth import get_password_hash, authenticate_user, crate_access_token
 from app.users.dependencies import get_current_user
 from app.users.schemas import SUserAuth
@@ -29,7 +29,7 @@ async def register_user(user_data: SUserAuth):
 async def login_user(response: Response, user_data: SUserAuth):
     user = await authenticate_user(user_data.email, user_data.password)
     if not user:
-        raise IncorrectEMailOrPasswordException
+        raise IncorrectEmailOrPasswordException
     access_token = crate_access_token({'sub': str(user.id)})
     #   оставляю куки в браузере пользователя
     response.set_cookie("booking_access_token", access_token, httponly=True)

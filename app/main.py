@@ -43,12 +43,17 @@ class SHotel(BaseModel):
     stars: int
 
 
-class SBooking(BaseModel):  # поля для POST запроса
-    room_id: int
-    date_from: date
-    date_to: date
 
 
-@app.post("/bookings")
-def add_booking(booking: SBooking):
-    pass
+
+
+
+# class SBooking(BaseModel):  # поля для POST запроса СХЕМА
+#     room_id: int
+#     date_from: date
+#     date_to: date
+#
+#
+# @app.post("/bookings")
+# def add_booking(booking: SBooking):
+#     pass
