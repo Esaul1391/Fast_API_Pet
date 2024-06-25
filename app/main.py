@@ -1,17 +1,40 @@
 from fastapi import FastAPI, Query, Depends
+from fastapi.staticfiles import StaticFiles # работа с файлами
+from fastapi.middleware.cors import CORSMiddleware
+
 from typing import Optional
 from datetime import date
 from pydantic import BaseModel
-
 from app.bookings.router import router as router_bookings
 from app.users.router import router as router_users
-
+from app.pages.router import router as router_pages
+from app.images.router import router as router_images
 
 
 app = FastAPI()  # вызываю класс fastapi
 
+app.mount('/static', StaticFiles(directory='app/static'), 'static') # монтирование стат. контента
+
 app.include_router(router_users)
 app.include_router(router_bookings)
+
+app.include_router(router_pages)
+app.include_router(router_images)
+
+
+# добавляю площадки которы могут обращаться к API
+origins = [
+    "http://localhoost:3000"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  #   разрушаю ориджин
+    allow_credentials=True, #   отвечает за cookies
+    allow_methods=["GET", "POST", "OPTIONS", "DELETE", "PATCH", "PUT"],
+    allow_headers=["Content-Type", "Set-Cookie", "Access-Control-Allow-Headers",
+                   "Access-Control-Allow-Origin", "Authorization"],
+)
 
 
 class HotelsSearchArgs:
