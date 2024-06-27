@@ -3,8 +3,12 @@ from typing import List
 from app.users.models import Users
 from app.users.dependencies import get_current_user
 from fastapi import APIRouter, Request, Depends
+
+
+
 from app.bookings.dao import BookingDAO
 from app.bookings.schemas import SBooking
+# from app.bookings.service import BookingService
 from app.exceptions import RoomCannotBeBooked
 
 router = APIRouter(
@@ -16,6 +20,20 @@ router = APIRouter(
 @router.get('')
 async def get_bookings(user: Users = Depends(get_current_user)) -> list[SBooking]:
     return await BookingDAO.find_all(user_id=user.id)
+
+# @router.post("", status_code=201)
+# async def add_booking(
+#
+#     booking: SNewBooking,
+#     background_tasks: BackgroundTasks,
+#     user: Users = Depends(get_current_user),
+# ):
+#     new_booking = await BookingService.add_booking(
+#         booking,
+#         background_tasks,
+#         user
+#     )
+#     return new_booking
 
 @router.post('')
 async def add_booking(
@@ -34,4 +52,3 @@ async def add_booking(
     #     query = select(Bookings)  # SELECT * FROM bookings;
     #     result = await session.execute(query)
     #     return result.scalars().all()
-
