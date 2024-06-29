@@ -12,35 +12,41 @@ from fastapi_cache.backends.redis import RedisBackend
 from fastapi_cache.decorator import cache
 
 from redis import asyncio as aioredis
+from sqladmin import Admin, ModelView
+
+from app.admin.auth import authentication_backend
+from app.admin.views import UsersAdmin, BookingsAdmin, HotelsAdmin, RoomsAdmin
+from app.database import engine
 
 from typing import Optional
 from datetime import date
 from pydantic import BaseModel
 from app.bookings.router import router as router_bookings
+from app.users.models import Users
 from app.users.router import router as router_users
 from app.pages.router import router as router_pages
 from app.images.router import router as router_images
 
 
-async def get_cashe():
-    while True:
-        print('start')
-        await asyncio.sleep(3)
-        print('end')
-@asynccontextmanager  # pip install "fastapi-cache2[redis]"
-async def lifespan(app: FastAPI):
-    # при запуске
-    print('connect redis')
-    redis = aioredis.from_url("redis://localhost:6379")
-    FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
-    asyncio.create_task(get_cashe())
-    print('Вот сейчас приложение запустится')
-    yield
+# async def get_cashe():
+#     while True:
+#         print('start')
+#         await asyncio.sleep(3)
+#         print('end')
+# @asynccontextmanager  # pip install "fastapi-cache2[redis]"
+# async def lifespan(app: FastAPI):
+#     # при запуске
+#     print('connect redis')
+#     redis = aioredis.from_url("redis://localhost:6379")
+#     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
+#     asyncio.create_task(get_cashe())
+#     print('Вот сейчас приложение запустится')
+#     yield
     # при выключении
 
 
 app = FastAPI(
-    lifespan=lifespan
+    # lifespan=lifespan
 )  # вызываю класс fastapi
 
 app.mount('/static', StaticFiles(directory='app/static'), 'static')  # монтирование стат. контента
@@ -93,6 +99,20 @@ class SHotel(BaseModel):
     address: str
     name: str
     stars: int
+
+
+
+
+admin = Admin(app, engine, authentication_backend=authentication_backend)
+
+admin.add_view(UsersAdmin)
+admin.add_view(BookingsAdmin)
+admin.add_view(HotelsAdmin)
+admin.add_view(RoomsAdmin)
+
+
+
+
 
 # class SBooking(BaseModel):  # поля для POST запроса СХЕМА
 #     room_id: int
