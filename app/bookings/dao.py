@@ -16,12 +16,11 @@ class BookingDAO(BaseDAO):
 
     @classmethod
     async def add(
-            cls,
-            user_id: int,
-            room_id: int,
-            date_from: date,
-
-            date_to: date,
+        cls,
+        user_id: int,
+        room_id: int,
+        date_from: date,
+        date_to: date,
     ):
         """
         WITH booked_rooms AS (
@@ -66,13 +65,17 @@ class BookingDAO(BaseDAO):
 
                 get_rooms_left = (
                     select(
-                        (Rooms.quantity - func.count(booked_rooms.c.room_id).filter(
-                            booked_rooms.c.room_id.is_not(None))).label(
-                            "rooms_left"
-                        )
+                        (
+                            Rooms.quantity
+                            - func.count(booked_rooms.c.room_id).filter(
+                                booked_rooms.c.room_id.is_not(None)
+                            )
+                        ).label("rooms_left")
                     )
                     .select_from(Rooms)
-                    .join(booked_rooms, booked_rooms.c.room_id == Rooms.id, isouter=True)
+                    .join(
+                        booked_rooms, booked_rooms.c.room_id == Rooms.id, isouter=True
+                    )
                     .where(Rooms.id == room_id)
                     .group_by(Rooms.quantity, booked_rooms.c.room_id)
                 )
