@@ -3,6 +3,7 @@ from typing import List
 from app.users.models import Users
 from app.users.dependencies import get_current_user
 from fastapi import APIRouter, Request, Depends
+from fastapi_versioning import version
 
 
 
@@ -18,6 +19,7 @@ router = APIRouter(
 
 
 @router.get('')
+@version(1)
 async def get_bookings(user: Users = Depends(get_current_user)) -> list[SBooking]:
     return await BookingDAO.find_all(user_id=user.id)
 
@@ -36,6 +38,7 @@ async def get_bookings(user: Users = Depends(get_current_user)) -> list[SBooking
 #     return new_booking
 
 @router.post('')
+@version(1)
 async def add_booking(
         room_id: int, date_from: date, date_to: date,
         user: Users = Depends(get_current_user),

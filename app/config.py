@@ -7,6 +7,7 @@ from typing import Literal
 #   переделать
 class Settings(BaseSettings):
     MODE: Literal['DEV', 'TEST', 'PROD'] = 'DEV'
+    LOG_LEVEL: str = "INFO"
     # DB_HOST: str
     # DB_PORT: int
     # DB_USER: str

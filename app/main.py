@@ -3,8 +3,9 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from datetime import date
 from typing import Optional
+import time
 
-from fastapi import Depends, FastAPI, Query
+from fastapi import Depends, FastAPI, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles  # работа с файлами
 from fastapi_cache import FastAPICache
@@ -14,6 +15,7 @@ from pydantic import BaseModel
 from redis import asyncio as aioredis
 from sqladmin import Admin, ModelView
 
+from app.logger import logger
 from app.admin.auth import authentication_backend
 from app.admin.views import BookingsAdmin, HotelsAdmin, RoomsAdmin, UsersAdmin
 from app.bookings.router import router as router_bookings
@@ -22,9 +24,25 @@ from app.images.router import router as router_images
 from app.pages.router import router as router_pages
 from app.users.models import Users
 from app.users.router import router as router_users
+from fastapi_versioning import VersionedFastAPI
 
 # async def get_cashe():
 #     while True:
+
+app = FastAPI(
+    # lifespan=lifespan
+)
+
+app = VersionedFastAPI(app,
+                       version_format='{major}',
+                       prefix_format='/v{major}',
+                       # description='Greet users with a nice message',
+                       # middleware=[
+                       #     Middleware(SessionMiddleware, secret_key='mysecretkey')
+                       # ]
+                       )
+
+# вызываю класс fastapi
 #         print('start')
 #         await asyncio.sleep(3)
 #         print('end')
@@ -40,13 +58,7 @@ from app.users.router import router as router_users
 # при выключении
 
 
-app = FastAPI(
-    # lifespan=lifespan
-)  # вызываю класс fastapi
 
-app.mount(
-    "/static", StaticFiles(directory="app/static"), "static"
-)  # монтирование стат. контента
 app.include_router(router_users)
 
 app.include_router(router_bookings)
@@ -74,12 +86,12 @@ app.add_middleware(
 
 class HotelsSearchArgs:
     def __init__(
-        self,
-        location: str,
-        date_from: date,
-        date_to: date,
-        has_spa: bool = Query(default=None),
-        stars: int = Query(ge=1, le=5, default=None),  # >= 1 и <= 5
+            self,
+            location: str,
+            date_from: date,
+            date_to: date,
+            has_spa: bool = Query(default=None),
+            stars: int = Query(ge=1, le=5, default=None),  # >= 1 и <= 5
     ):
         self.location = location
         self.date_from = date_from
@@ -101,11 +113,27 @@ class SHotel(BaseModel):
 
 admin = Admin(app, engine, authentication_backend=authentication_backend)
 
+@app.middleware("http")
+async def add_process_time_header(request: Request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = time.time() - start_time
+    logger.info("Request execution time", extra={
+        "process_time": round(process_time, 4)
+    })
+    return response
+
 admin.add_view(UsersAdmin)
 admin.add_view(BookingsAdmin)
 admin.add_view(HotelsAdmin)
 admin.add_view(RoomsAdmin)
 
+
+
+
+app.mount(
+    "/static", StaticFiles(directory="app/static"), "static"
+)  # монтирование стат. контента
 
 # class SBooking(BaseModel):  # поля для POST запроса СХЕМА
 #     room_id: int
@@ -116,3 +144,10 @@ admin.add_view(RoomsAdmin)
 # @app.post("/bookings")
 # def add_booking(booking: SBooking):
 #     pass
+
+
+
+
+
+
+
