@@ -14,6 +14,7 @@ from fastapi_cache.decorator import cache
 from pydantic import BaseModel
 from redis import asyncio as aioredis
 from sqladmin import Admin, ModelView
+from prometheus_fastapi_instrumentator import Instrumentator, metrics
 
 from app.logger import logger
 from app.admin.auth import authentication_backend
@@ -83,6 +84,13 @@ app.add_middleware(
     ],
 )
 
+
+instrumentator = Instrumentator(
+    should_group_status_codes=False,
+    excluded_handlers=[".*admin.*", "/metrics"],
+)
+
+instrumentator.instrument(app).expose(app)
 
 class HotelsSearchArgs:
     def __init__(
